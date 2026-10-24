@@ -20,6 +20,7 @@ Elle déclare les permissions de l'hôte qu'elle utilise ; le Studio les vérifi
 | id | contenu |
 |---|---|
 | `systeme` | `copier-valeur`, `exporter-texte`, `sauvegarder-valeur`, `restaurer-valeur` (fr, en, es, sw) |
+| `datetime` | `date-et-heure`, `heure-courte`, `jour-actuel`, `date-courte`, `date-iso`, `dans-jours`, `dans-mois`, `jours-restants`, `jours-ecoules`, `est-passee`, `formater-duree`, `chrono-demarrer`, `chrono-lire` (fr, en, es, sw) — voir [`docs/datetime.md`](docs/datetime.md) |
 
 ## Licence
 MIT — voir [`LICENSE`](LICENSE).

@@ -1,0 +1,248 @@
+{
+  "format": "berkios-library/1",
+  "id": "datetime",
+  "version": "1.0.0",
+  "title": "Date et heure",
+  "description": "Dates relatives, jours restants, formats courts, durées lisibles et chronomètre en une seule commande.",
+  "author": "BERKIOS",
+  "license": "MIT",
+  "permissions": [
+    "stockage"
+  ],
+  "commands": [
+    {
+      "id": "date-et-heure",
+      "names": [
+        "date-et-heure",
+        "date-and-time",
+        "fecha-y-hora",
+        "tarehe-na-saa"
+      ],
+      "usage": "date-et-heure \"Cible\"",
+      "summary": "Écrit la date et l'heure actuelles sous la forme 24/10/2026 14:30.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "maintenant %1 \"JJ/MM/AAAA HH:mm\""
+      ]
+    },
+    {
+      "id": "heure-courte",
+      "names": [
+        "heure-courte",
+        "short-time",
+        "hora-corta",
+        "saa-fupi"
+      ],
+      "usage": "heure-courte \"Cible\"",
+      "summary": "Écrit l'heure actuelle sous la forme 14:30 (sans secondes).",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "maintenant %1 \"HH:mm\""
+      ]
+    },
+    {
+      "id": "date-courte",
+      "names": [
+        "date-courte",
+        "short-date",
+        "fecha-corta",
+        "tarehe-fupi"
+      ],
+      "usage": "date-courte \"Cible\"",
+      "summary": "Met la date de la cible au format JJ/MM/AAAA.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "formater-date %1 \"JJ/MM/AAAA\""
+      ]
+    },
+    {
+      "id": "date-iso",
+      "names": [
+        "date-iso",
+        "iso-date",
+        "fecha-iso",
+        "tarehe-iso"
+      ],
+      "usage": "date-iso \"Cible\"",
+      "summary": "Met la date de la cible au format AAAA-MM-JJ (celui des champs date).",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "formater-date %1 \"AAAA-MM-JJ\""
+      ]
+    },
+    {
+      "id": "jour-actuel",
+      "names": [
+        "jour-actuel",
+        "current-weekday",
+        "dia-actual",
+        "siku-ya-sasa"
+      ],
+      "usage": "jour-actuel \"Cible\"",
+      "summary": "Écrit le nom du jour de la semaine d'aujourd'hui (lundi, mardi…).",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "aujourdhui \"$dtjour\"",
+        "jour-semaine \"$dtjour\" %1"
+      ]
+    },
+    {
+      "id": "dans-jours",
+      "names": [
+        "dans-jours",
+        "in-days",
+        "en-dias",
+        "baada-ya-siku"
+      ],
+      "usage": "dans-jours \"Cible\" 30",
+      "summary": "Écrit la date d'aujourd'hui plus (ou moins, si négatif) le nombre de jours donné.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "aujourdhui %1",
+        "ajouter-jours %1 %2"
+      ]
+    },
+    {
+      "id": "dans-mois",
+      "names": [
+        "dans-mois",
+        "in-months",
+        "en-meses",
+        "baada-ya-miezi"
+      ],
+      "usage": "dans-mois \"Cible\" 3",
+      "summary": "Écrit la date d'aujourd'hui plus le nombre de mois donné (fin de mois respectée).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "aujourdhui %1",
+        "ajouter-mois %1 %2"
+      ]
+    },
+    {
+      "id": "jours-restants",
+      "names": [
+        "jours-restants",
+        "days-left",
+        "dias-restantes",
+        "siku-zilizobaki"
+      ],
+      "usage": "jours-restants \"Date\" \"Résultat\"",
+      "summary": "Nombre de jours entre aujourd'hui et la date (négatif si elle est passée).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "aujourdhui \"$dtjour\"",
+        "ecart-jours \"$dtjour\" %1 %2"
+      ]
+    },
+    {
+      "id": "jours-ecoules",
+      "names": [
+        "jours-ecoules",
+        "days-since",
+        "dias-transcurridos",
+        "siku-zilizopita"
+      ],
+      "usage": "jours-ecoules \"Date\" \"Résultat\"",
+      "summary": "Nombre de jours écoulés depuis la date (négatif si elle est à venir).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "aujourdhui \"$dtjour\"",
+        "ecart-jours %1 \"$dtjour\" %2"
+      ]
+    },
+    {
+      "id": "est-passee",
+      "names": [
+        "est-passee",
+        "is-past",
+        "esta-pasada",
+        "imepita"
+      ],
+      "usage": "est-passee \"Date\" \"Résultat\"",
+      "summary": "Écrit true si la date est strictement avant aujourd'hui, sinon false.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "aujourdhui \"$dtjour\"",
+        "ecart-jours \"$dtjour\" %1 \"$dtecart\"",
+        "choisir %2 \"$dtecart\" < 0 \"true\" \"false\""
+      ]
+    },
+    {
+      "id": "formater-duree",
+      "names": [
+        "formater-duree",
+        "format-duration",
+        "formatear-duracion",
+        "fomati-muda"
+      ],
+      "usage": "formater-duree \"Secondes\" \"Résultat\"",
+      "summary": "Convertit un nombre de secondes en durée HH:MM:SS (les heures peuvent dépasser 24).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "copier %1 \"$dtsec\"",
+        "entier \"$dtsec\"",
+        "set \"$dtsh\" \"3600\"",
+        "set \"$dtsm\" \"60\"",
+        "calculate \"$dth\" \"$dtsec\" / \"$dtsh\"",
+        "plancher \"$dth\"",
+        "copier \"$dtsec\" \"$dtr\"",
+        "modulo \"$dtr\" 3600",
+        "calculate \"$dtm\" \"$dtr\" / \"$dtsm\"",
+        "plancher \"$dtm\"",
+        "copier \"$dtsec\" \"$dts\"",
+        "modulo \"$dts\" 60",
+        "remplir-gauche \"$dth\" 2",
+        "remplir-gauche \"$dtm\" 2",
+        "remplir-gauche \"$dts\" 2",
+        "concatener %2 \"$dth\" \":\" \"$dtm\" \":\" \"$dts\""
+      ]
+    },
+    {
+      "id": "chrono-demarrer",
+      "names": [
+        "chrono-demarrer",
+        "start-stopwatch",
+        "iniciar-cronometro",
+        "anza-kipima-muda"
+      ],
+      "usage": "chrono-demarrer \"clé\"",
+      "summary": "Démarre un chronomètre : mémorise l'instant présent sous la clé donnée.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "horodatage \"$dtnow\"",
+        "stocker %1 \"$dtnow\""
+      ]
+    },
+    {
+      "id": "chrono-lire",
+      "names": [
+        "chrono-lire",
+        "read-stopwatch",
+        "leer-cronometro",
+        "soma-kipima-muda"
+      ],
+      "usage": "chrono-lire \"clé\" \"Résultat\"",
+      "summary": "Écrit le nombre de secondes écoulées depuis chrono-demarrer (même clé). Erreur si le chronomètre n'a pas démarré.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "horodatage \"$dtnow\"",
+        "lire %1 \"$dtdebut\"",
+        "verifier \"$dtdebut\" > 0 \"Chronomètre non démarré.\"",
+        "calculate %2 \"$dtnow\" - \"$dtdebut\""
+      ]
+    }
+  ]
+}
