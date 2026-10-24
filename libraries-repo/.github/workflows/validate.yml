@@ -1,0 +1,19 @@
+name: Valider les bibliothèques
+
+# À chaque envoi sur main et chaque pull request : le catalogue doit se construire et les tests passer.
+# La publication (release) reste déclenchée uniquement par une étiquette « v* » (voir release.yml).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node scripts/build-release.mjs
+      - run: node --test "tests/*.test.mjs"

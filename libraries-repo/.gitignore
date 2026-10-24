@@ -1,0 +1,5 @@
+# Produits par `node scripts/build-release.mjs` (publiés dans la release, pas dans le dépôt)
+dist/
+node_modules/
+.DS_Store
+Thumbs.db

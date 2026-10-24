@@ -1,0 +1,44 @@
+{
+  "format": "berkios-library/1",
+  "id": "systeme",
+  "version": "1.0.0",
+  "title": "Système",
+  "description": "Presse-papiers, fichiers et mémoire locale en une seule commande.",
+  "author": "BERKIOS",
+  "license": "MIT",
+  "permissions": ["presse-papiers", "fichiers", "stockage"],
+  "commands": [
+    {
+      "id": "copier-valeur",
+      "names": ["copier-valeur", "copy-value", "copiar-valor", "nakili-thamani"],
+      "usage": "copier-valeur \"Source\"",
+      "summary": "Copie la valeur d'un composant dans le presse-papiers et le confirme par un message.",
+      "minArgs": 1, "maxArgs": 1,
+      "body": ["copier-presse-papiers %1", "message \"Copié dans le presse-papiers\""]
+    },
+    {
+      "id": "exporter-texte",
+      "names": ["exporter-texte", "export-text", "exportar-texto", "hamisha-maandishi"],
+      "usage": "exporter-texte \"nom.txt\" \"Source\"",
+      "summary": "Enregistre la valeur d'un composant dans un fichier texte.",
+      "minArgs": 2, "maxArgs": 2,
+      "body": ["telecharger %1 %2"]
+    },
+    {
+      "id": "sauvegarder-valeur",
+      "names": ["sauvegarder-valeur", "save-value", "guardar-valor", "hifadhi-thamani"],
+      "usage": "sauvegarder-valeur \"clé\" \"Source\"",
+      "summary": "Mémorise la valeur d'un composant pour la prochaine ouverture de l'application.",
+      "minArgs": 2, "maxArgs": 2,
+      "body": ["stocker %1 %2"]
+    },
+    {
+      "id": "restaurer-valeur",
+      "names": ["restaurer-valeur", "restore-value", "restaurar-valor", "rudisha-thamani"],
+      "usage": "restaurer-valeur \"clé\" \"Cible\" [\"valeur par défaut\"]",
+      "summary": "Relit une valeur mémorisée dans un composant (valeur par défaut facultative).",
+      "minArgs": 2, "maxArgs": 3,
+      "body": ["lire %*"]
+    }
+  ]
+}
