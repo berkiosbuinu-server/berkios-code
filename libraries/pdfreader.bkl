@@ -1,0 +1,363 @@
+{
+  "format": "berkios-library/1",
+  "id": "pdfreader",
+  "version": "1.0.0",
+  "title": "pdfReader (lecteur PDF)",
+  "description": "Pilotage d'une liseuse PDF : pages, progression, signets, reprise de lecture, citations et zoom, en une seule commande.",
+  "author": "BERKIOS",
+  "license": "MIT",
+  "permissions": [
+    "stockage"
+  ],
+  "commands": [
+    {
+      "id": "page-suivante",
+      "names": [
+        "pdf-page-suivante",
+        "pdf-next-page",
+        "pdf-pagina-siguiente",
+        "pdf-ukurasa-unaofuata"
+      ],
+      "usage": "pdf-page-suivante \"Page\" \"Total\"",
+      "summary": "Passe à la page suivante, sans dépasser le nombre total de pages.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "copier %2 \"$pdfmax\"",
+        "verifier \"$pdfmax\" >= 1 \"Nombre de pages inconnu.\"",
+        "increment %1",
+        "borner %1 1 \"$pdfmax\""
+      ]
+    },
+    {
+      "id": "page-precedente",
+      "names": [
+        "pdf-page-precedente",
+        "pdf-previous-page",
+        "pdf-pagina-anterior",
+        "pdf-ukurasa-uliotangulia"
+      ],
+      "usage": "pdf-page-precedente \"Page\"",
+      "summary": "Revient à la page précédente, sans descendre sous la page 1.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "decrement %1",
+        "borner %1 1 999999"
+      ]
+    },
+    {
+      "id": "premiere-page",
+      "names": [
+        "pdf-premiere-page",
+        "pdf-first-page",
+        "pdf-primera-pagina",
+        "pdf-ukurasa-wa-kwanza"
+      ],
+      "usage": "pdf-premiere-page \"Page\"",
+      "summary": "Va à la première page.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "set %1 \"1\""
+      ]
+    },
+    {
+      "id": "derniere-page",
+      "names": [
+        "pdf-derniere-page",
+        "pdf-last-page",
+        "pdf-ultima-pagina",
+        "pdf-ukurasa-wa-mwisho"
+      ],
+      "usage": "pdf-derniere-page \"Page\" \"Total\"",
+      "summary": "Va à la dernière page (le total doit être renseigné).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "verifier %2 >= 1 \"Nombre de pages inconnu.\"",
+        "copier %2 %1"
+      ]
+    },
+    {
+      "id": "aller-page",
+      "names": [
+        "pdf-aller-page",
+        "pdf-go-to-page",
+        "pdf-ir-a-pagina",
+        "pdf-nenda-ukurasa"
+      ],
+      "usage": "pdf-aller-page \"Page\" \"Total\" \"Numéro\"",
+      "summary": "Va à un numéro de page, ramené entre 1 et le total (décimales ignorées).",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "verifier %2 >= 1 \"Nombre de pages inconnu.\"",
+        "copier %3 %1",
+        "entier %1",
+        "borner %1 1 %2"
+      ]
+    },
+    {
+      "id": "progression",
+      "names": [
+        "pdf-progression",
+        "pdf-progress",
+        "pdf-progreso",
+        "pdf-maendeleo"
+      ],
+      "usage": "pdf-progression \"Page\" \"Total\" \"Résultat\"",
+      "summary": "Pourcentage de lecture (page / total), de 0 à 100, arrondi à l'entier.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "verifier %2 >= 1 \"Nombre de pages inconnu.\"",
+        "pourcentage %3 %1 %2 0",
+        "borner %3 0 100"
+      ]
+    },
+    {
+      "id": "page-sur",
+      "names": [
+        "pdf-page-sur",
+        "pdf-page-of",
+        "pdf-pagina-de",
+        "pdf-ukurasa-wa"
+      ],
+      "usage": "pdf-page-sur \"Page\" \"Total\" \"Résultat\"",
+      "summary": "Écrit le repère « 3 / 12 ».",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "concatener %3 %1 \" / \" %2"
+      ]
+    },
+    {
+      "id": "pages-restantes",
+      "names": [
+        "pdf-pages-restantes",
+        "pdf-pages-left",
+        "pdf-paginas-restantes",
+        "pdf-kurasa-zilizobaki"
+      ],
+      "usage": "pdf-pages-restantes \"Page\" \"Total\" \"Résultat\"",
+      "summary": "Nombre de pages qu'il reste à lire (0 si la dernière page est atteinte).",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "calculate %3 %2 - %1",
+        "borner %3 0 999999"
+      ]
+    },
+    {
+      "id": "temps-restant",
+      "names": [
+        "pdf-temps-restant",
+        "pdf-time-left",
+        "pdf-tiempo-restante",
+        "pdf-muda-uliobaki"
+      ],
+      "usage": "pdf-temps-restant \"Page\" \"Total\" \"Minutes par page\" \"Résultat\"",
+      "summary": "Estimation, en minutes, du temps de lecture restant.",
+      "minArgs": 4,
+      "maxArgs": 4,
+      "body": [
+        "copier %3 \"$pdfmin\"",
+        "calculate \"$pdfrest\" %2 - %1",
+        "borner \"$pdfrest\" 0 999999",
+        "calculate %4 \"$pdfrest\" * \"$pdfmin\"",
+        "arrondir %4 0"
+      ]
+    },
+    {
+      "id": "memoriser",
+      "names": [
+        "pdf-memoriser",
+        "pdf-remember",
+        "pdf-recordar",
+        "pdf-kumbuka"
+      ],
+      "usage": "pdf-memoriser \"clé\" \"Page\"",
+      "summary": "Mémorise la page atteinte pour la prochaine ouverture de l'application.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "stocker %1 %2"
+      ]
+    },
+    {
+      "id": "reprendre",
+      "names": [
+        "pdf-reprendre",
+        "pdf-resume",
+        "pdf-reanudar",
+        "pdf-endelea"
+      ],
+      "usage": "pdf-reprendre \"clé\" \"Page\"",
+      "summary": "Relit la page mémorisée (page 1 si rien n'a été mémorisé).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "lire %1 %2 \"1\""
+      ]
+    },
+    {
+      "id": "signet-ajouter",
+      "names": [
+        "pdf-signet-ajouter",
+        "pdf-bookmark-add",
+        "pdf-marcador-agregar",
+        "pdf-alamisho-ongeza"
+      ],
+      "usage": "pdf-signet-ajouter \"Signets\" \"Page\"",
+      "summary": "Ajoute une page à la liste des signets (sans doublon, triée).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "copier %2 \"$pdfpg\"",
+        "liste-ajouter %1 \"{$pdfpg}\"",
+        "liste-unique %1",
+        "liste-trier %1"
+      ]
+    },
+    {
+      "id": "signet-retirer",
+      "names": [
+        "pdf-signet-retirer",
+        "pdf-bookmark-remove",
+        "pdf-marcador-quitar",
+        "pdf-alamisho-ondoa"
+      ],
+      "usage": "pdf-signet-retirer \"Signets\" \"Page\"",
+      "summary": "Retire une page de la liste des signets.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "copier %2 \"$pdfpg\"",
+        "liste-retirer %1 \"{$pdfpg}\""
+      ]
+    },
+    {
+      "id": "signet-existe",
+      "names": [
+        "pdf-signet-existe",
+        "pdf-bookmark-exists",
+        "pdf-marcador-existe",
+        "pdf-alamisho-ipo"
+      ],
+      "usage": "pdf-signet-existe \"Signets\" \"Page\" \"Résultat\"",
+      "summary": "true si la page est déjà dans les signets, sinon false.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "copier %2 \"$pdfpg\"",
+        "liste-contient %1 \"{$pdfpg}\" %3"
+      ]
+    },
+    {
+      "id": "signets-nombre",
+      "names": [
+        "pdf-signets-nombre",
+        "pdf-bookmark-count",
+        "pdf-marcadores-total",
+        "pdf-alamisho-idadi"
+      ],
+      "usage": "pdf-signets-nombre \"Signets\" \"Résultat\"",
+      "summary": "Nombre de signets.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "liste-taille %1 %2"
+      ]
+    },
+    {
+      "id": "est-pdf",
+      "names": [
+        "pdf-est-pdf",
+        "pdf-is-pdf",
+        "pdf-es-pdf",
+        "pdf-ni-pdf"
+      ],
+      "usage": "pdf-est-pdf \"Nom\" \"Résultat\"",
+      "summary": "true si le nom ou l'adresse se termine par .pdf (majuscules acceptées).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "finit-par %1 \".pdf\" %2"
+      ]
+    },
+    {
+      "id": "ouvrir-lien",
+      "names": [
+        "pdf-ouvrir-lien",
+        "pdf-open-link",
+        "pdf-abrir-enlace",
+        "pdf-fungua-kiungo"
+      ],
+      "usage": "pdf-ouvrir-lien \"https://exemple.org/guide.pdf\"",
+      "summary": "Ouvre l'adresse http(s) d'un PDF écrite dans le script (pas un nom de composant) ; refuse une adresse invalide ou qui ne finit pas par .pdf.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "est-url %1 \"$pdfurl\"",
+        "verifier \"$pdfurl\" = \"true\" \"Adresse http(s) invalide.\"",
+        "finit-par %1 \".pdf\" \"$pdfext\"",
+        "verifier \"$pdfext\" = \"true\" \"L'adresse ne désigne pas un fichier .pdf.\"",
+        "ouvrir %1"
+      ]
+    },
+    {
+      "id": "citation",
+      "names": [
+        "pdf-citation",
+        "pdf-quote",
+        "pdf-cita",
+        "pdf-nukuu"
+      ],
+      "usage": "pdf-citation \"Résultat\" \"Document\" \"Page\" \"Extrait\"",
+      "summary": "Compose une citation : « extrait » — document, p. 3.",
+      "minArgs": 4,
+      "maxArgs": 4,
+      "body": [
+        "verifier %4 != \"\" \"Extrait vide.\"",
+        "concatener %1 \"« \" %4 \" » — \" %2 \", p. \" %3"
+      ]
+    },
+    {
+      "id": "zoom-avant",
+      "names": [
+        "pdf-zoom-avant",
+        "pdf-zoom-in",
+        "pdf-acercar",
+        "pdf-kuza"
+      ],
+      "usage": "pdf-zoom-avant \"Zoom\"",
+      "summary": "Augmente le zoom de 25 points (100 par défaut, 400 maximum).",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "par-defaut %1 \"100\"",
+        "increment %1 25",
+        "borner %1 25 400"
+      ]
+    },
+    {
+      "id": "zoom-arriere",
+      "names": [
+        "pdf-zoom-arriere",
+        "pdf-zoom-out",
+        "pdf-alejar",
+        "pdf-punguza"
+      ],
+      "usage": "pdf-zoom-arriere \"Zoom\"",
+      "summary": "Diminue le zoom de 25 points (25 minimum).",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "par-defaut %1 \"100\"",
+        "decrement %1 25",
+        "borner %1 25 400"
+      ]
+    }
+  ]
+}
