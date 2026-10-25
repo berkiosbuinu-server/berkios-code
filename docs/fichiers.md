@@ -1,6 +1,6 @@
-# Bibliothèque `fichiers` (Fichiers et dossiers) — v1.0.0
+# Bibliothèque `fichiers` (Fichiers et dossiers) — v1.1.0
 
-27 commandes pour BERKIOS CODE, en **français et en anglais** ; la forme qualifiée `fichiers.<nom>` fonctionne aussi.
+28 commandes pour BERKIOS CODE, en **français et en anglais** ; la forme qualifiée `fichiers.<nom>` fonctionne aussi.
 Permissions demandées : `fichiers` (création de fichiers) et `stockage` (espace de dossiers de l'application).
 
 ## Deux mondes, à ne pas confondre
@@ -56,7 +56,8 @@ Si un fichier du même nom existe déjà, l'application générée ajoute ` (1)`
 | Commande | Syntaxe | Effet |
 |---|---|---|
 | `fichier-ecrire` · `write-file` | `fichier-ecrire "Rapports/a.txt" "Source"` | crée ou remplace ; le dossier doit exister |
-| `fichier-ajouter` · `append-file` | `fichier-ajouter "Logs/j.txt" "Texte" [" \| "]` | ajoute à la suite (crée le fichier si besoin) ; séparateur facultatif |
+| `fichier-ajouter` · `append-file` | `fichier-ajouter "Logs/j.txt" "Texte" [" \| "]` | ajoute à la suite, sans retour à la ligne (crée le fichier si besoin) ; séparateur facultatif |
+| `fichier-ajouter-ligne` · `append-line` | `fichier-ajouter-ligne "Logs/j.txt" "Texte"` | ajoute le texte sur une **nouvelle ligne** (demande BERKIOS 0.7.100 ou plus) |
 | `fichier-lire` · `read-file` | `fichier-lire "Rapports/a.txt" "Résultat"` | contenu du fichier |
 | `fichier-existe` · `file-exists` | `fichier-existe "Rapports/a.txt" "Résultat"` | `true` ou `false` |
 | `fichier-taille` · `file-size` | `fichier-taille "Rapports/a.txt" "Résultat"` | nombre de caractères |
@@ -98,8 +99,7 @@ quand clic
 - Contenu **texte** uniquement (UTF-8). L'espace est fait pour des données modestes (notes, journaux, exports), pas pour de gros fichiers.
 - Pas de renommage, déplacement ni suppression récursive de dossier ; `fichier-renommer` reste dans le même dossier.
 - Une commande de bibliothèque ne peut pas suivre `si … alors` ni `repeter` : d'où `dossier-assurer` et `fichier-supprimer-si-existe`.
-- BERKIOS CODE ne sait pas écrire un saut de ligne dans un texte : `fichier-ajouter` accepte donc un séparateur au lieu d'un retour à la ligne.
-- **Persistance** : dans l'application Flutter générée, l'espace est enregistré avec les autres valeurs mémorisées de l'application. Dans l'**aperçu du Studio**,
-  il est gardé dans le navigateur et **partagé par tous les projets** ouverts dans ce navigateur : utilisez des noms de dossiers distincts pour vos essais.
+- **Saut de ligne** : dans un texte entre guillemets, `\n` donne un retour à la ligne (Studio depuis la v0.7.96, **applications Flutter depuis la v0.7.100** : avant, le runtime Dart écrivait la lettre `n`). `fichier-ajouter-ligne` s'en sert ; sur un moteur plus ancien elle s'arrête avec un message clair, sans rien écrire (utilisez alors `fichier-ajouter` avec un séparateur).
+- **Persistance** : dans l'application Flutter générée, l'espace est enregistré avec les autres valeurs mémorisées de l'application. Dans l'**aperçu du Studio**, il est gardé dans le navigateur, **séparément pour chaque projet** (depuis la v0.7.100 ; avant, tous les projets du même navigateur le partageaient). Un projet jamais enregistré est identifié par son nom : à son premier enregistrement, l'espace d'essai repart à zéro.
 - Les variables internes commençant par `$fs` sont réservées aux macros ; évitez ces noms dans vos scripts.
 - Le Dart généré n'a pas été compilé dans l'environnement de préparation de cette bibliothèque.
