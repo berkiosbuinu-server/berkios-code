@@ -1,0 +1,702 @@
+{
+  "format": "berkios-library/1",
+  "id": "mygame",
+  "version": "1.3.0",
+  "title": "MyGame — création de jeux 2D",
+  "description": "Bibliothèque 2D MyGame avec commandes natives Klondike : distribution, pioche, déplacement validé, annulation et dessin sur le canevas BERKIOS natif.",
+  "author": "BERKIOS",
+  "license": "MIT",
+  "permissions": [
+    "stockage"
+  ],
+  "commands": [
+    {
+      "id": "canevas",
+      "names": [
+        "jeu-canevas",
+        "game-canvas"
+      ],
+      "usage": "jeu-canevas \"Canevas\"",
+      "summary": "Choisit le composant « Canevas de jeu » sur lequel dessinent toutes les commandes jeu-… (à écrire au chargement).",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "set \"$jeu_canevas\" %1"
+      ]
+    },
+    {
+      "id": "image",
+      "names": [
+        "jeu-image",
+        "game-frame"
+      ],
+      "usage": "jeu-image [\"#f7f7f7\"]",
+      "summary": "Commence une nouvelle image : vide le tampon de dessin (couleur de fond facultative). À appeler au début de chaque tic.",
+      "minArgs": 0,
+      "maxArgs": 1,
+      "body": [
+        "canevas-effacer \"$jeu_canevas\" %*"
+      ]
+    },
+    {
+      "id": "afficher",
+      "names": [
+        "jeu-afficher",
+        "game-show"
+      ],
+      "usage": "jeu-afficher",
+      "summary": "Affiche d'un coup l'image dessinée depuis jeu-image (double tampon, sans scintillement). À appeler à la fin du tic.",
+      "minArgs": 0,
+      "maxArgs": 0,
+      "body": [
+        "canevas-afficher \"$jeu_canevas\""
+      ]
+    },
+    {
+      "id": "rect",
+      "names": [
+        "jeu-rect",
+        "game-rect"
+      ],
+      "usage": "jeu-rect x y largeur hauteur \"#535353\" [contour [épaisseur]]",
+      "summary": "Rectangle plein (ou contour).",
+      "minArgs": 5,
+      "maxArgs": 7,
+      "body": [
+        "canevas-rect \"$jeu_canevas\" %*"
+      ]
+    },
+    {
+      "id": "ligne",
+      "names": [
+        "jeu-ligne",
+        "game-line"
+      ],
+      "usage": "jeu-ligne x1 y1 x2 y2 \"#535353\" [épaisseur]",
+      "summary": "Ligne.",
+      "minArgs": 5,
+      "maxArgs": 6,
+      "body": [
+        "canevas-ligne \"$jeu_canevas\" %*"
+      ]
+    },
+    {
+      "id": "cercle",
+      "names": [
+        "jeu-cercle",
+        "game-circle"
+      ],
+      "usage": "jeu-cercle x y rayon \"#535353\" [contour [épaisseur]]",
+      "summary": "Disque (ou cercle).",
+      "minArgs": 4,
+      "maxArgs": 6,
+      "body": [
+        "canevas-cercle \"$jeu_canevas\" %*"
+      ]
+    },
+    {
+      "id": "texte",
+      "names": [
+        "jeu-texte",
+        "game-text"
+      ],
+      "usage": "jeu-texte x y \"Texte\" [taille] [\"#535353\"] [gauche|centre|droite]",
+      "summary": "Texte à chasse fixe ({$variable} est remplacé).",
+      "minArgs": 3,
+      "maxArgs": 6,
+      "body": [
+        "canevas-texte \"$jeu_canevas\" %*"
+      ]
+    },
+    {
+      "id": "sprite",
+      "names": [
+        "jeu-sprite",
+        "game-sprite"
+      ],
+      "usage": "jeu-sprite x y \"$motif\" [échelle] [\"#535353\"]",
+      "summary": "Image en pixels : motif = lignes séparées par « / » ('.' transparent, autre caractère = pixel).",
+      "minArgs": 3,
+      "maxArgs": 5,
+      "body": [
+        "canevas-sprite \"$jeu_canevas\" %*"
+      ]
+    },
+    {
+      "id": "deplacer",
+      "names": [
+        "jeu-avancer",
+        "game-step"
+      ],
+      "usage": "jeu-avancer \"$x\" \"$vitesse\"",
+      "summary": "x = x + vitesse (un pas de mouvement par tic).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "evaluer \"%1 + %2\" %1"
+      ]
+    },
+    {
+      "id": "gravite",
+      "names": [
+        "jeu-gravite",
+        "game-gravity"
+      ],
+      "usage": "jeu-gravite \"$y\" \"$vy\" gravité",
+      "summary": "Applique la gravité : vy += gravité, puis y += vy (y vers le bas).",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "evaluer \"%2 + %3\" %2",
+        "evaluer \"%1 + %2\" %1"
+      ]
+    },
+    {
+      "id": "sol",
+      "names": [
+        "jeu-sol",
+        "game-floor"
+      ],
+      "usage": "jeu-sol \"$y\" \"$vy\" y_du_sol",
+      "summary": "Empêche de passer sous le sol : y est ramené au sol et vy remis à 0 au contact.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "evaluer \"%2 * (%1 < %3)\" %2",
+        "evaluer \"min(%1;%3)\" %1"
+      ]
+    },
+    {
+      "id": "au-sol",
+      "names": [
+        "jeu-au-sol",
+        "game-on-floor"
+      ],
+      "usage": "jeu-au-sol \"$resultat\" \"$y\" y_du_sol",
+      "summary": "Écrit 1 si y est au sol (ou en dessous), sinon 0.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "evaluer \"%2 >= %3\" %1"
+      ]
+    },
+    {
+      "id": "sauter",
+      "names": [
+        "jeu-sauter",
+        "game-jump"
+      ],
+      "usage": "jeu-sauter \"$y\" \"$vy\" y_du_sol force",
+      "summary": "Saute seulement si y est au sol : vy = force (négative = vers le haut).",
+      "minArgs": 4,
+      "maxArgs": 4,
+      "body": [
+        "evaluer \"%2 + (%1 >= %3) * (%4 - %2)\" %2"
+      ]
+    },
+    {
+      "id": "defiler",
+      "names": [
+        "jeu-defiler",
+        "game-scroll"
+      ],
+      "usage": "jeu-defiler \"$x\" vitesse largeur",
+      "summary": "Décalage de décor qui défile vers la gauche et se reboucle sur « largeur ».",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "evaluer \"((%1 + %2) % %3 + %3) % %3\" %1"
+      ]
+    },
+    {
+      "id": "collision",
+      "names": [
+        "jeu-collision",
+        "game-collision"
+      ],
+      "usage": "jeu-collision \"$résultat\" xA yA lA hA xB yB lB hB",
+      "summary": "Écrit 1 si les rectangles A et B se chevauchent, sinon 0.",
+      "minArgs": 9,
+      "maxArgs": 9,
+      "body": [
+        "evaluer \"(%2 < %6 + %8) * (%2 + %4 > %6) * (%3 < %7 + %9) * (%3 + %5 > %7)\" %1"
+      ]
+    },
+    {
+      "id": "animer",
+      "names": [
+        "jeu-animer",
+        "game-animate"
+      ],
+      "usage": "jeu-animer \"$image\" \"$tic\" période",
+      "summary": "Image d'animation 0/1 qui alterne toutes les « période » tics.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "evaluer \"floor(%2 / %3) % 2\" %1"
+      ]
+    },
+    {
+      "id": "hasard",
+      "names": [
+        "jeu-hasard",
+        "game-random"
+      ],
+      "usage": "jeu-hasard \"$valeur\" min max",
+      "summary": "Entier au hasard entre min et max inclus.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "aleatoire %*"
+      ]
+    },
+    {
+      "id": "choisir",
+      "names": [
+        "jeu-choisir",
+        "game-choose"
+      ],
+      "usage": "jeu-choisir \"$résultat\" \"$drapeau\" \"si 1\" \"si 0\"",
+      "summary": "Place « si 1 » (drapeau = 1) ou « si 0 » dans le résultat ; sert au mode jour/nuit.",
+      "minArgs": 4,
+      "maxArgs": 4,
+      "body": [
+        "choisir %1 %2 = \"1\" %3 %4"
+      ]
+    },
+    {
+      "id": "score-texte",
+      "names": [
+        "jeu-score-texte",
+        "game-score-text"
+      ],
+      "usage": "jeu-score-texte \"$texte\" \"$score\" chiffres",
+      "summary": "Écrit le score entier complété de zéros à gauche (00042).",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "evaluer \"floor(%2)\" %1",
+        "remplir-gauche %1 %3 \"0\""
+      ]
+    },
+    {
+      "id": "record-charger",
+      "names": [
+        "jeu-record-charger",
+        "game-load-record"
+      ],
+      "usage": "jeu-record-charger \"clé\" \"$record\"",
+      "summary": "Relit le meilleur score mémorisé (0 s'il n'y en a pas).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "lire %1 %2 \"0\""
+      ]
+    },
+    {
+      "id": "record-sauver",
+      "names": [
+        "jeu-record-sauver",
+        "game-save-record"
+      ],
+      "usage": "jeu-record-sauver \"clé\" \"$score\" \"$record\"",
+      "summary": "Si score > record : met à jour le record et le mémorise.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "evaluer \"floor(max(%2;%3))\" %3",
+        "stocker %1 %3"
+      ]
+    },
+    {
+      "id": "son-saut",
+      "names": [
+        "jeu-son-saut",
+        "game-sound-jump"
+      ],
+      "usage": "jeu-son-saut",
+      "summary": "Bip de saut.",
+      "minArgs": 0,
+      "maxArgs": 0,
+      "body": [
+        "bip 660 70"
+      ]
+    },
+    {
+      "id": "son-point",
+      "names": [
+        "jeu-son-point",
+        "game-sound-point"
+      ],
+      "usage": "jeu-son-point",
+      "summary": "Bip de palier (tous les 100 points).",
+      "minArgs": 0,
+      "maxArgs": 0,
+      "body": [
+        "bip 988 90"
+      ]
+    },
+    {
+      "id": "son-perdu",
+      "names": [
+        "jeu-son-perdu",
+        "game-sound-lost"
+      ],
+      "usage": "jeu-son-perdu",
+      "summary": "Bip grave de fin de partie.",
+      "minArgs": 0,
+      "maxArgs": 0,
+      "body": [
+        "bip 196 300"
+      ]
+    },
+    {
+      "id": "carte-couleur",
+      "names": [
+        "jeu-carte-couleur",
+        "game-card-color"
+      ],
+      "usage": "jeu-carte-couleur \"$couleur\" \"coeur|carreau|trèfle|pique\"",
+      "summary": "Détermine la couleur d'une enseigne : rouge pour cœur/carreau, noir pour trèfle/pique.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "choisir %1 %2 = \"coeur\" \"rouge\" \"noir\"",
+        "si %2 = \"carreau\" alors set %1 \"rouge\"",
+        "si %2 = \"hearts\" alors set %1 \"rouge\"",
+        "si %2 = \"diamonds\" alors set %1 \"rouge\"",
+        "si %2 = \"clubs\" alors set %1 \"noir\"",
+        "si %2 = \"spades\" alors set %1 \"noir\""
+      ]
+    },
+    {
+      "id": "carte-alternance",
+      "names": [
+        "jeu-carte-alternance",
+        "game-card-alternation"
+      ],
+      "usage": "jeu-carte-alternance \"$ok\" couleur_carte couleur_sommet rang_carte rang_sommet",
+      "summary": "Valide une pose au tableau : couleur opposée et rang inférieur d'un cran. Écrit 1 ou 0.",
+      "minArgs": 5,
+      "maxArgs": 5,
+      "body": [
+        "evaluer \"(%2 != %3) * (%4 == (%5 - 1))\" %1"
+      ]
+    },
+    {
+      "id": "carte-fondation",
+      "names": [
+        "jeu-carte-fondation",
+        "game-card-foundation"
+      ],
+      "usage": "jeu-carte-fondation \"$ok\" rang_carte enseigne_carte rang_sommet enseigne_sommet",
+      "summary": "Valide une pose en fondation : as sur pile vide, puis même enseigne et rang suivant.",
+      "minArgs": 5,
+      "maxArgs": 5,
+      "body": [
+        "evaluer \"(%4 == 0) * (%2 == 1) + (%4 > 0) * (%2 == (%4 + 1)) * (%3 == %5)\" %1"
+      ]
+    },
+    {
+      "id": "carte-cachee",
+      "names": [
+        "jeu-carte-cachee",
+        "game-card-hidden"
+      ],
+      "usage": "jeu-carte-cachee x1 y1 x2 y2",
+      "summary": "Dessine le dos standard d'une carte à l'emplacement courant (motif graphique).",
+      "minArgs": 4,
+      "maxArgs": 4,
+      "body": [
+        "canevas-rect \"$jeu_canevas\" %1 %2 66 92 \"#244a87\" contour 1",
+        "canevas-ligne \"$jeu_canevas\" %1 %2 %3 %4 \"#9db8e8\" 2",
+        "canevas-ligne \"$jeu_canevas\" %3 %2 %1 %4 \"#9db8e8\" 2"
+      ]
+    },
+    {
+      "id": "carte-face",
+      "names": [
+        "jeu-carte-face",
+        "game-card-face"
+      ],
+      "usage": "jeu-carte-face x y rang couleur enseigne",
+      "summary": "Dessine une carte face visible (base 48×68) avec rang et symbole d'enseigne.",
+      "minArgs": 5,
+      "maxArgs": 5,
+      "body": [
+        "canevas-rect \"$jeu_canevas\" %1 %2 66 92 \"#ffffff\" contour 1",
+        "canevas-texte \"$jeu_canevas\" %1 %2 %3 16 %4 gauche",
+        "canevas-texte \"$jeu_canevas\" %1 %2 %5 25 %4 centre"
+      ]
+    },
+    {
+      "id": "carte-rang-texte",
+      "names": [
+        "jeu-carte-rang",
+        "game-card-rank-label"
+      ],
+      "usage": "jeu-carte-rang \"$texte\" rang",
+      "summary": "Convertit un rang 1–13 en A, 2–10, J, Q ou K.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "evaluer \"%1\" \"$rang_num\"",
+        "choisir \"$rang_num\" \"$texte\" 1 \"A\" 2 \"2\" 3 \"3\" 4 \"4\" 5 \"5\" 6 \"6\" 7 \"7\" 8 \"8\" 9 \"9\" 10 \"10\" 11 \"J\" 12 \"Q\" 13 \"K\""
+      ]
+    },
+    {
+      "id": "carte-est-rouge",
+      "names": [
+        "jeu-carte-est-rouge",
+        "game-card-is-red"
+      ],
+      "usage": "jeu-carte-est-rouge \"$ok\" enseigne",
+      "summary": "Écrit 1 pour cœur/carreau/diamants/hearts, sinon 0.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "set %1 \"0\"",
+        "si %2 = \"coeur\" alors set %1 \"1\"",
+        "si %2 = \"cœur\" alors set %1 \"1\"",
+        "si %2 = \"carreau\" alors set %1 \"1\"",
+        "si %2 = \"hearts\" alors set %1 \"1\"",
+        "si %2 = \"diamonds\" alors set %1 \"1\""
+      ]
+    },
+    {
+      "id": "carte-peut-retourner",
+      "names": [
+        "jeu-carte-peut-retourner",
+        "game-card-can-flip"
+      ],
+      "usage": "jeu-carte-peut-retourner \"$ok\" face_visible est_sommet",
+      "summary": "Autorise le retournement uniquement d’une carte cachée au sommet.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "evaluer \"(%2 == 0) * (%3 == 1)\" %1"
+      ]
+    },
+    {
+      "id": "carte-peut-tableau",
+      "names": [
+        "jeu-carte-peut-tableau",
+        "game-card-can-tableau"
+      ],
+      "usage": "jeu-carte-peut-tableau \"$ok\" rang couleur sommet_rang sommet_couleur pile_vide",
+      "summary": "Vérifie la règle Klondike tableau : roi sur vide, sinon rang inférieur et couleur opposée.",
+      "minArgs": 6,
+      "maxArgs": 6,
+      "body": [
+        "evaluer \"(%6 == 1) * (%2 == 13) + (%6 == 0) * (%2 == (%4 - 1)) * (%3 != %5)\" %1"
+      ]
+    },
+    {
+      "id": "carte-peut-fondation",
+      "names": [
+        "jeu-carte-peut-fondation",
+        "game-card-can-foundation"
+      ],
+      "usage": "jeu-carte-peut-fondation \"$ok\" rang enseigne sommet_rang sommet_enseigne pile_vide",
+      "summary": "Vérifie as sur fondation vide, puis même enseigne et rang suivant.",
+      "minArgs": 6,
+      "maxArgs": 6,
+      "body": [
+        "evaluer \"(%6 == 1) * (%2 == 1) + (%6 == 0) * (%2 == (%4 + 1)) * (%3 == %5)\" %1"
+      ]
+    },
+    {
+      "id": "carte-points",
+      "names": [
+        "jeu-carte-points",
+        "game-card-points"
+      ],
+      "usage": "jeu-carte-points \"$score\" action",
+      "summary": "Ajoute/retire les points standard : fondation +10, retournement +5, retour depuis fondation -15.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "si %2 = \"fondation\" alors evaluer \"%1 + 10\" %1",
+        "si %2 = \"retourner\" alors evaluer \"%1 + 5\" %1",
+        "si %2 = \"retour-fondation\" alors evaluer \"%1 - 15\" %1"
+      ]
+    },
+    {
+      "id": "carte-compter-fondations",
+      "names": [
+        "jeu-carte-compter-fondations",
+        "game-card-foundation-count"
+      ],
+      "usage": "jeu-carte-compter-fondations \"$gagnees\" f1 f2 f3 f4",
+      "summary": "Additionne les cartes des quatre fondations.",
+      "minArgs": 5,
+      "maxArgs": 5,
+      "body": [
+        "evaluer \"%2 + %3 + %4 + %5\" %1"
+      ]
+    },
+    {
+      "id": "carte-victoire",
+      "names": [
+        "jeu-carte-victoire",
+        "game-card-win"
+      ],
+      "usage": "jeu-carte-victoire \"$gagne\" total_fondations",
+      "summary": "Écrit 1 quand les quatre fondations contiennent 52 cartes.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "evaluer \"(%2 == 52)\" %1"
+      ]
+    },
+    {
+      "id": "carte-reinitialiser-score",
+      "names": [
+        "jeu-carte-score-zero",
+        "game-card-reset-score"
+      ],
+      "usage": "jeu-carte-score-zero \"$score\"",
+      "summary": "Réinitialise le score de la partie.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "set %1 \"0\""
+      ]
+    },
+    {
+      "id": "carte-incremente-coup",
+      "names": [
+        "jeu-carte-coup",
+        "game-card-move-count"
+      ],
+      "usage": "jeu-carte-coup \"$coups\"",
+      "summary": "Incrémente le compteur de coups.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "evaluer \"%1 + 1\" %1"
+      ]
+    },
+    {
+      "id": "carte-decompte",
+      "names": [
+        "jeu-carte-decompte",
+        "game-card-count"
+      ],
+      "usage": "jeu-carte-decompte \"$reste\" total pioche defausse fondations",
+      "summary": "Calcule le nombre de cartes hors colonnes (pour afficher les compteurs).",
+      "minArgs": 5,
+      "maxArgs": 5,
+      "body": [
+        "evaluer \"%2 - %3 - %4 - %5\" %1"
+      ]
+    },
+    {
+      "id": "carte-symbole",
+      "names": [
+        "jeu-carte-symbole",
+        "game-card-suit-symbol"
+      ],
+      "usage": "jeu-carte-symbole \"$symbole\" enseigne",
+      "summary": "Convertit une enseigne en symbole Unicode.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "set %1 \"♠\"",
+        "si %2 = \"coeur\" alors set %1 \"♥\"",
+        "si %2 = \"cœur\" alors set %1 \"♥\"",
+        "si %2 = \"hearts\" alors set %1 \"♥\"",
+        "si %2 = \"carreau\" alors set %1 \"♦\"",
+        "si %2 = \"diamonds\" alors set %1 \"♦\"",
+        "si %2 = \"trèfle\" alors set %1 \"♣\"",
+        "si %2 = \"clubs\" alors set %1 \"♣\"",
+        "si %2 = \"spades\" alors set %1 \"♠\""
+      ]
+    },
+    {
+      "id": "carte-message-coup",
+      "names": [
+        "jeu-carte-message-coup",
+        "game-card-move-message"
+      ],
+      "usage": "jeu-carte-message-coup \"$message\" ok",
+      "summary": "Prépare un message simple de résultat de validation.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "set %1 \"Coup illégal\"",
+        "si %2 = 1 alors set %1 \"Coup autorisé\""
+      ]
+    },
+    {
+      "id": "solitaire-nouvelle",
+      "names": [
+        "jeu-solitaire-nouvelle",
+        "solitaire-nouvelle"
+      ],
+      "usage": "jeu-solitaire-nouvelle \"Canevas\" [1|3]",
+      "summary": "Crée une vraie partie Klondike dans le runtime BERKIOS : mélange, 52 cartes, 7 colonnes et fondations. Dessine sur le canevas natif.",
+      "minArgs": 1,
+      "maxArgs": 2,
+      "body": [
+        "solitaire-new %*"
+      ]
+    },
+    {
+      "id": "solitaire-piocher",
+      "names": [
+        "jeu-solitaire-piocher",
+        "solitaire-piocher"
+      ],
+      "usage": "jeu-solitaire-piocher \"Canevas\"",
+      "summary": "Pioche 1 ou 3 cartes, retourne la défausse quand la pioche est vide et redessine le jeu nativement.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "solitaire-draw %*"
+      ]
+    },
+    {
+      "id": "solitaire-deplacer",
+      "names": [
+        "jeu-solitaire-deplacer",
+        "solitaire-deplacer"
+      ],
+      "usage": "jeu-solitaire-deplacer \"Canevas\" source index_source offset destination index_destination",
+      "summary": "Déplace une carte ou une séquence en validant les règles Klondike. Sources : tableau, waste, foundation. Destinations : tableau ou foundation. Indices à partir de zéro.",
+      "minArgs": 6,
+      "maxArgs": 6,
+      "body": [
+        "solitaire-move %*"
+      ]
+    },
+    {
+      "id": "solitaire-annuler",
+      "names": [
+        "jeu-solitaire-annuler",
+        "solitaire-annuler"
+      ],
+      "usage": "jeu-solitaire-annuler \"Canevas\"",
+      "summary": "Annule le dernier coup et redessine le plateau. Historique limité à 100 coups.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "solitaire-undo %*"
+      ]
+    },
+    {
+      "id": "solitaire-dessiner",
+      "names": [
+        "jeu-solitaire-dessiner",
+        "solitaire-dessiner"
+      ],
+      "usage": "jeu-solitaire-dessiner \"Canevas\"",
+      "summary": "Redessine l’état actuel de la partie avec les opérations du canevas natif BERKIOS.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "solitaire-render %*"
+      ]
+    }
+  ]
+}

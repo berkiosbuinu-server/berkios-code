@@ -1,0 +1,60 @@
+{
+  "format": "berkios-library/1",
+  "id": "batterie",
+  "version": "1.0.0",
+  "title": "Batterie et alimentation",
+  "description": "Lecture native du niveau et de l’état de batterie dans les applications Flutter générées.",
+  "author": "BERKIOS",
+  "license": "MIT",
+  "permissions": [
+    "stockage"
+  ],
+  "commands": [
+    {
+      "id": "niveau-batterie",
+      "names": [
+        "lire-niveau-batterie",
+        "read-battery-level",
+        "soma-kiwango-betri"
+      ],
+      "usage": "niveau-batterie \"$niveau\"",
+      "summary": "Écrit le niveau de batterie de 0 à 100 dans la variable ou le composant cible. Disponible dans les applications Flutter générées sur les appareils compatibles.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "battery-level %1"
+      ]
+    },
+    {
+      "id": "etat-batterie",
+      "names": [
+        "lire-etat-batterie",
+        "read-battery-state",
+        "soma-hali-betri"
+      ],
+      "usage": "etat-batterie \"$etat\"",
+      "summary": "Écrit charge, décharge, pleine, branchée ou inconnu dans la variable ou le composant cible. Disponible dans les applications Flutter générées sur les appareils compatibles.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "battery-state %1"
+      ]
+    },
+    {
+      "id": "lire-batterie",
+      "names": [
+        "lire-batterie",
+        "read-battery",
+        "soma-betri"
+      ],
+      "usage": "lire-batterie \"$niveau\" \"$etat\"",
+      "summary": "Lit en une commande le niveau et l’état de batterie dans deux variables ou composants.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "battery-level %1",
+        "battery-state %2"
+      ]
+    }
+  ]
+}

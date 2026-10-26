@@ -1,9 +1,9 @@
 {
   "format": "berkios-library/1",
   "id": "fichiers",
-  "version": "1.1.0",
+  "version": "1.3.0",
   "title": "Fichiers et dossiers",
-  "description": "Noms de fichiers sûrs, extensions et chemins, création de fichiers texte, et un espace de dossiers et fichiers interne à l'application (créer, lister, lire, écrire, renommer, copier, supprimer, exporter).",
+  "description": "Noms et chemins sûrs, espace virtuel persistant, accès disque dans le répertoire de travail ou dans des dossiers externes explicitement autorisés, et lecture de liens HTTP/HTTPS publics.",
   "author": "BERKIOS",
   "license": "MIT",
   "permissions": [
@@ -451,38 +451,11 @@
         "delete-folder"
       ],
       "usage": "dossier-supprimer \"Chemin\"",
-      "summary": "Supprime un dossier VIDE de l'espace de l'application (refus s'il contient quelque chose : supprimez d'abord son contenu).",
+      "summary": "Supprime récursivement un dossier virtuel et tous ses fichiers et sous-dossiers ; ne touche pas au disque.",
       "minArgs": 1,
       "maxArgs": 1,
       "body": [
-        "copier %1 \"$fsp\"",
-        "nettoyer \"$fsp\"",
-        "remplacer \"$fsp\" \"\\\\\" \"/\"",
-        "correspond \"$fsp\" \"^(?!/)(?! )(?!.* $)(?!.* /)(?!.*/ )(?!.*//)(?!.*\\\\.\\\\.)(?!.*(^|/)\\\\.(/|$))[\\\\p{L}\\\\p{N}_. /-]{1,200}(?<!/)$\" \"$fsok\"",
-        "verifier \"$fsok\" = \"true\" \"Chemin invalide : lettres, chiffres, espaces et _ - . ; sous-dossiers séparés par /, sans / au début ni à la fin.\"",
-        "copier \"$fsp\" \"$fsk\"",
-        "minuscules \"$fsk\"",
-        "compter-texte \"$fsp\" \"/\" \"$fsc\"",
-        "set \"$fsone\" \"1\"",
-        "calculate \"$fsc1\" \"$fsc\" + \"$fsone\"",
-        "partie \"$fsp\" \"/\" \"$fsc1\" \"$fsn\"",
-        "longueur \"$fsp\" \"$fsl\"",
-        "longueur \"$fsn\" \"$fsnl\"",
-        "calculate \"$fsdl\" \"$fsl\" - \"$fsnl\"",
-        "calculate \"$fsdl\" \"$fsdl\" - \"$fsone\"",
-        "sous-texte \"$fsp\" 1 \"$fsdl\" \"$fsd\"",
-        "copier \"$fsd\" \"$fsdk\"",
-        "minuscules \"$fsdk\"",
-        "lire \"fs:e:{$fsk}\" \"$fsx\" \"\"",
-        "verifier \"$fsx\" = \"!d\" \"Dossier introuvable.\"",
-        "lire \"fs:i:{$fsk}\" \"$fsi\" \"\"",
-        "liste-taille \"$fsi\" \"$fsnb\"",
-        "verifier \"$fsnb\" = 0 \"Le dossier n'est pas vide.\"",
-        "oublier \"fs:e:{$fsk}\"",
-        "oublier \"fs:i:{$fsk}\"",
-        "lire \"fs:i:{$fsdk}\" \"$fsi\" \"\"",
-        "liste-retirer \"$fsi\" \"{$fsn}/\"",
-        "stocker \"fs:i:{$fsdk}\" \"$fsi\""
+        "dossier-supprimer-virtuel %1"
       ]
     },
     {
@@ -533,7 +506,7 @@
         "append-file"
       ],
       "usage": "fichier-ajouter \"Dossier/journal.txt\" \"Texte\" [\"séparateur\"]",
-      "summary": "Ajoute du texte à la fin d'un fichier de l'espace de l'application (le crée s'il n'existe pas ; le dossier doit exister). Le séparateur facultatif est inséré entre l'ancien contenu et le texte ajouté. Pour passer à la ligne, utilisez plutôt fichier-ajouter-ligne.",
+      "summary": "Ajoute du texte à la fin d'un fichier de l'espace de l'application (le crée s'il n'existe pas ; le dossier doit exister). Le séparateur facultatif est inséré entre l'ancien contenu et le texte ajouté ; BERKIOS CODE ne sait pas écrire un saut de ligne dans un texte (utilisez par exemple \" | \" ou la valeur d'un champ multiligne).",
       "minArgs": 2,
       "maxArgs": 3,
       "body": [
@@ -562,52 +535,6 @@
         "verifier \"$fsx\" != \"!d\" \"Un dossier porte déjà ce nom.\"",
         "lire \"fs:c:{$fsk}\" \"$fsold\" \"\"",
         "si \"$fsold\" != \"\" alors concatener \"$fsold\" \"$fsold\" %3 %2",
-        "si \"$fsold\" = \"\" alors copier %2 \"$fsold\"",
-        "stocker \"fs:c:{$fsk}\" \"$fsold\"",
-        "stocker \"fs:e:{$fsk}\" \"!f\"",
-        "si \"$fsx\" = \"\" alors lire \"fs:i:{$fsdk}\" \"$fsi\" \"\"",
-        "si \"$fsx\" = \"\" alors liste-ajouter \"$fsi\" \"{$fsn}\"",
-        "si \"$fsx\" = \"\" alors stocker \"fs:i:{$fsdk}\" \"$fsi\""
-      ]
-    },
-    {
-      "id": "fichier-ajouter-ligne",
-      "names": [
-        "fichier-ajouter-ligne",
-        "append-line"
-      ],
-      "usage": "fichier-ajouter-ligne \"Dossier/journal.txt\" \"Texte\"",
-      "summary": "Ajoute le texte sur une NOUVELLE LIGNE à la fin d'un fichier de l'espace de l'application (le crée s'il n'existe pas ; le dossier doit exister). Demande BERKIOS 0.7.100 ou plus.",
-      "minArgs": 2,
-      "maxArgs": 2,
-      "body": [
-        "copier %1 \"$fsp\"",
-        "nettoyer \"$fsp\"",
-        "remplacer \"$fsp\" \"\\\\\" \"/\"",
-        "correspond \"$fsp\" \"^(?!/)(?! )(?!.* $)(?!.* /)(?!.*/ )(?!.*//)(?!.*\\\\.\\\\.)(?!.*(^|/)\\\\.(/|$))[\\\\p{L}\\\\p{N}_. /-]{1,200}(?<!/)$\" \"$fsok\"",
-        "verifier \"$fsok\" = \"true\" \"Chemin invalide : lettres, chiffres, espaces et _ - . ; sous-dossiers séparés par /, sans / au début ni à la fin.\"",
-        "copier \"$fsp\" \"$fsk\"",
-        "minuscules \"$fsk\"",
-        "compter-texte \"$fsp\" \"/\" \"$fsc\"",
-        "set \"$fsone\" \"1\"",
-        "calculate \"$fsc1\" \"$fsc\" + \"$fsone\"",
-        "partie \"$fsp\" \"/\" \"$fsc1\" \"$fsn\"",
-        "longueur \"$fsp\" \"$fsl\"",
-        "longueur \"$fsn\" \"$fsnl\"",
-        "calculate \"$fsdl\" \"$fsl\" - \"$fsnl\"",
-        "calculate \"$fsdl\" \"$fsdl\" - \"$fsone\"",
-        "sous-texte \"$fsp\" 1 \"$fsdl\" \"$fsd\"",
-        "copier \"$fsd\" \"$fsdk\"",
-        "minuscules \"$fsdk\"",
-        "set \"$fspk\" \"!d\"",
-        "si \"$fsd\" != \"\" alors lire \"fs:e:{$fsdk}\" \"$fspk\" \"\"",
-        "verifier \"$fspk\" = \"!d\" \"Le dossier parent n'existe pas.\"",
-        "set \"$fsnl\" \"\\n\"",
-        "verifier \"$fsnl\" != \"n\" \"Cette commande demande BERKIOS 0.7.100 ou plus : mettez le Studio à jour et régénérez l'application.\"",
-        "lire \"fs:e:{$fsk}\" \"$fsx\" \"\"",
-        "verifier \"$fsx\" != \"!d\" \"Un dossier porte déjà ce nom.\"",
-        "lire \"fs:c:{$fsk}\" \"$fsold\" \"\"",
-        "si \"$fsold\" != \"\" alors concatener \"$fsold\" \"$fsold\" \"$fsnl\" %2",
         "si \"$fsold\" = \"\" alors copier %2 \"$fsold\"",
         "stocker \"fs:c:{$fsk}\" \"$fsold\"",
         "stocker \"fs:e:{$fsk}\" \"!f\"",
@@ -900,6 +827,150 @@
         "compter-texte \"$fsn\" \".\" \"$fsdots\"",
         "si \"$fsdots\" = 0 alors concatener \"$fsn\" \"$fsn\" \".txt\"",
         "telecharger \"{$fsn}\" \"$fsv\""
+      ]
+    },
+    {
+      "id": "autoriser-dossier-externe",
+      "names": [
+        "autoriser-dossier-externe",
+        "authorize-external-folder"
+      ],
+      "usage": "autoriser-dossier-externe \"$chemin\"",
+      "summary": "Ouvre un sélecteur natif pour autoriser un dossier externe. Les chemins absolus dans ce dossier sont accessibles jusqu'à la fermeture de l'application.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "ouvrir-dossier-autorise %1"
+      ]
+    },
+    {
+      "id": "fichier-lire-lien",
+      "names": [
+        "fichier-lire-lien",
+        "read-url"
+      ],
+      "usage": "fichier-lire-lien \"https://exemple.org/fichier.txt\" \"$contenu\"",
+      "summary": "Lit le contenu texte d’une URL HTTP/HTTPS publique (10 Mio maximum, délai de 15 secondes, dépend des règles CORS du serveur).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "lire-url-texte %1 %2"
+      ]
+    },
+    {
+      "id": "fichier-lire-disque",
+      "names": [
+        "fichier-lire-disque",
+        "read-existing-file"
+      ],
+      "usage": "fichier-lire-disque \"chemin/relatif.txt\" \"$resultat\"",
+      "summary": "Lit un fichier UTF-8 existant dans le workspace ou dans un dossier externe explicitement autorisé (chemin absolu).",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "disque-lire %1 %2"
+      ]
+    },
+    {
+      "id": "fichier-ecrire-disque",
+      "names": [
+        "fichier-ecrire-disque",
+        "write-disk-file"
+      ],
+      "usage": "fichier-ecrire-disque \"chemin/relatif.txt\" \"contenu\"",
+      "summary": "Écrit un fichier UTF-8 dans le workspace ou dans un dossier externe explicitement autorisé; crée les parents nécessaires.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "disque-ecrire %1 %2"
+      ]
+    },
+    {
+      "id": "dossier-lister-disque",
+      "names": [
+        "dossier-lister-disque",
+        "list-disk-folder"
+      ],
+      "usage": "dossier-lister-disque \"dossier\" \"$resultat\"",
+      "summary": "Liste les éléments d’un dossier du workspace ou d’un dossier externe autorisé, un élément par ligne.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "disque-lister %1 %2"
+      ]
+    },
+    {
+      "id": "dossier-creer-disque",
+      "names": [
+        "dossier-creer-disque",
+        "create-disk-folder"
+      ],
+      "usage": "dossier-creer-disque \"dossier/sous-dossier\"",
+      "summary": "Crée un dossier dans le workspace ou dans un emplacement externe autorisé.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "disque-dossier-creer %1"
+      ]
+    },
+    {
+      "id": "dossier-supprimer-disque",
+      "names": [
+        "dossier-supprimer-disque",
+        "delete-disk-folder"
+      ],
+      "usage": "dossier-supprimer-disque \"dossier/sous-dossier\"",
+      "summary": "Supprime récursivement un sous-dossier du workspace ou d’un emplacement externe autorisé; refuse de supprimer la racine autorisée.",
+      "minArgs": 1,
+      "maxArgs": 1,
+      "body": [
+        "disque-dossier-supprimer %1"
+      ]
+    },
+    {
+      "id": "fichier-ajouter-ligne",
+      "names": [
+        "fichier-ajouter-ligne",
+        "append-line"
+      ],
+      "usage": "fichier-ajouter-ligne \"Dossier/journal.txt\" \"Texte\"",
+      "summary": "Ajoute le texte sur une nouvelle ligne dans un fichier de l'espace virtuel de l'application. Le dossier parent doit exister.",
+      "minArgs": 2,
+      "maxArgs": 2,
+      "body": [
+        "set \"$fsnl\" \"\\n\"",
+        "verifier \"$fsnl\" = \"\\n\" \"Cette commande demande BERKIOS 0.7.100 ou plus récent : prise en charge du retour à la ligne requise.\"",
+        "copier %1 \"$fsp\"",
+        "nettoyer \"$fsp\"",
+        "remplacer \"$fsp\" \"\\\\\" \"/\"",
+        "correspond \"$fsp\" \"^(?!/)(?! )(?!.* $)(?!.* /)(?!.*/ )(?!.*//)(?!.*\\\\.\\\\.)(?!.*(^|/)\\\\.(/|$))[\\\\p{L}\\\\p{N}_. /-]{1,200}(?<!/)$\" \"$fsok\"",
+        "verifier \"$fsok\" = \"true\" \"Chemin invalide : lettres, chiffres, espaces et _ - . ; sous-dossiers séparés par /, sans / au début ni à la fin.\"",
+        "copier \"$fsp\" \"$fsk\"",
+        "minuscules \"$fsk\"",
+        "compter-texte \"$fsp\" \"/\" \"$fsc\"",
+        "set \"$fsone\" \"1\"",
+        "calculate \"$fsc1\" \"$fsc\" + \"$fsone\"",
+        "partie \"$fsp\" \"/\" \"$fsc1\" \"$fsn\"",
+        "longueur \"$fsp\" \"$fsl\"",
+        "longueur \"$fsn\" \"$fsnl\"",
+        "calculate \"$fsdl\" \"$fsl\" - \"$fsnl\"",
+        "calculate \"$fsdl\" \"$fsdl\" - \"$fsone\"",
+        "sous-texte \"$fsp\" 1 \"$fsdl\" \"$fsd\"",
+        "copier \"$fsd\" \"$fsdk\"",
+        "minuscules \"$fsdk\"",
+        "set \"$fspk\" \"!d\"",
+        "si \"$fsd\" != \"\" alors lire \"fs:e:{$fsdk}\" \"$fspk\" \"\"",
+        "verifier \"$fspk\" = \"!d\" \"Le dossier parent n'existe pas.\"",
+        "lire \"fs:e:{$fsk}\" \"$fsx\" \"\"",
+        "verifier \"$fsx\" != \"!d\" \"Un dossier porte déjà ce nom.\"",
+        "lire \"fs:c:{$fsk}\" \"$fsold\" \"\"",
+        "si \"$fsold\" != \"\" alors concatener \"$fsold\" \"$fsold\" \"\\n\" %2",
+        "si \"$fsold\" = \"\" alors copier %2 \"$fsold\"",
+        "stocker \"fs:c:{$fsk}\" \"$fsold\"",
+        "stocker \"fs:e:{$fsk}\" \"!f\"",
+        "si \"$fsx\" = \"\" alors lire \"fs:i:{$fsdk}\" \"$fsi\" \"\"",
+        "si \"$fsx\" = \"\" alors liste-ajouter \"$fsi\" \"{$fsn}\"",
+        "si \"$fsx\" = \"\" alors stocker \"fs:i:{$fsdk}\" \"$fsi\""
       ]
     }
   ]
