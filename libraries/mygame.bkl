@@ -1,9 +1,9 @@
 {
   "format": "berkios-library/1",
   "id": "mygame",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "title": "MyGame — création de jeux 2D",
-  "description": "Bibliothèque 2D MyGame avec commandes natives Klondike : distribution, pioche, déplacement validé, annulation et dessin sur le canevas BERKIOS natif.",
+  "description": "Bibliothèque 2D MyGame avec commandes natives Klondike : distribution, pioche, toucher du plateau, déplacement validé, annulation et dessin sur le canevas BERKIOS natif.",
   "author": "BERKIOS",
   "license": "MIT",
   "permissions": [
@@ -626,6 +626,20 @@
       "body": [
         "set %1 \"Coup illégal\"",
         "si %2 = 1 alors set %1 \"Coup autorisé\""
+      ]
+    },
+    {
+      "id": "solitaire-toucher",
+      "names": [
+        "jeu-solitaire-toucher",
+        "solitaire-toucher"
+      ],
+      "usage": "jeu-solitaire-toucher \"Canevas\" x y",
+      "summary": "Traite un toucher ou un clic aux coordonnées x y du canevas : pioche, sélection d’une carte ou déplacement vers une destination selon les règles Klondike. Redessine le plateau.",
+      "minArgs": 3,
+      "maxArgs": 3,
+      "body": [
+        "solitaire-tap %*"
       ]
     },
     {
